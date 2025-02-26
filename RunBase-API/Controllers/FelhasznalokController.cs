@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RunBase_API.Models;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using System.Security.Cryptography;
+using BCrypt.Net;
 
 namespace RunBase_API.Controllers
 {
@@ -77,11 +80,20 @@ namespace RunBase_API.Controllers
         [HttpPost]
         public async Task<ActionResult<Felhasznalok>> PostFelhasznalok(Felhasznalok felhasznalok)
         {
+            if (string.IsNullOrWhiteSpace(felhasznalok.Jelszo))
+            {
+                return BadRequest("A jelszó nem lehet üres!");
+            }
+
+            // Jelszó hashelése bcrypt segítségével
+            felhasznalok.Jelszo = BCrypt.Net.BCrypt.HashPassword(felhasznalok.Jelszo);
+
             _context.Felhasznaloks.Add(felhasznalok);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetFelhasznalok", new { id = felhasznalok.Id }, felhasznalok);
         }
+
 
         // DELETE: api/Felhasznalok/5
         [HttpDelete("{id}")]
