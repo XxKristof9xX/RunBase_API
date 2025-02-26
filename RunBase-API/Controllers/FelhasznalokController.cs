@@ -94,6 +94,24 @@ namespace RunBase_API.Controllers
             return CreatedAtAction("GetFelhasznalok", new { id = felhasznalok.Id }, felhasznalok);
         }
 
+        [HttpPost("login")]
+        public async Task<ActionResult<string>> Login([FromBody] Dictionary<string, string> model)
+        {
+            if (!model.TryGetValue("Nev", out string? nev) || !model.TryGetValue("Jelszo", out string? jelszo))
+            {
+                return BadRequest("Hiányzó felhasználónév vagy jelszó.");
+            }
+
+            var user = await _context.Felhasznaloks.FirstOrDefaultAsync(u => u.Nev == nev);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(jelszo, user.Jelszo))
+            {
+                return Unauthorized("Hibás felhasználónév vagy jelszó.");
+            }
+
+            return Ok("Sikeres bejelentkezés!");
+        }
+
 
         // DELETE: api/Felhasznalok/5
         [HttpDelete("{id}")]
