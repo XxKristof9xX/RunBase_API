@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace RunBase_API.Models;
@@ -15,7 +16,8 @@ public partial class Felhasznalok
     [JsonIgnore]
     public string? Jelszo { get; set; }
 
-    public string Tipus { get; set; } = null!;
+    [RegularExpression("^(user|competitor|organizer|administrator)$", ErrorMessage = "Érvénytelen felhasználói típus.")]
+    public string Tipus { get; set; } = "user";
 
     public virtual Versenyzo? Versenyzo { get; set; }
 }
