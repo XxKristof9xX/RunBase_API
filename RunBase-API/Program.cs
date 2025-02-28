@@ -6,11 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowSpecificOrigin",
-        policy => policy.WithOrigins("https://runbase.hu")
+    options.AddPolicy("AllowAllOrigins",
+        policy => policy.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
+
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<RunBaseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("dbConnection")));
