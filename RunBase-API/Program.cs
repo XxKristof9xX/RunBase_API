@@ -4,7 +4,13 @@ using RunBase_API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        policy => policy.WithOrigins("https://www.runbase.hu")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+});
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<RunBaseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("dbConnection")));

@@ -78,8 +78,14 @@ namespace RunBase_API.Controllers
         // POST: api/Felhasznalok
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Felhasznalok>> PostFelhasznalok(Felhasznalok felhasznalok)
+        public async Task<ActionResult<Felhasznalok>> PostFelhasznalok([FromBody] Felhasznalok felhasznalok)
         {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState+"\nNév: "+felhasznalok.Nev);
+            }
+
             if (string.IsNullOrWhiteSpace(felhasznalok.Jelszo))
             {
                 return BadRequest("A jelszó nem lehet üres!");

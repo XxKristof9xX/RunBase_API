@@ -13,7 +13,6 @@ public partial class Felhasznalok
 
     public string Nev { get; set; } = null!;
 
-    [JsonIgnore]
     public string? Jelszo { get; set; }
 
     [RegularExpression("^(user|competitor|organizer|administrator)$", ErrorMessage = "Érvénytelen felhasználói típus.")]
