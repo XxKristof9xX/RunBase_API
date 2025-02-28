@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        policy => policy.WithOrigins("https://www.runbase.hu", "https://runbase.hu")
+        policy => policy.WithOrigins("https://www.runbase.hu", "https://runbase.hu", "https://kind-coast-0fe7e9603.4.azurestaticapps.net")
                         .AllowAnyHeader()
                         .AllowAnyMethod());
 });
