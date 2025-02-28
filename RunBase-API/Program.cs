@@ -4,13 +4,7 @@ using RunBase_API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAllOrigins",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
-});
+builder.Services.AddCors();
 
 
 builder.Services.AddControllers();
@@ -20,7 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-app.UseCors("AllowSpecificOrigin");
+app.UseCors("https://runbase.hu");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
