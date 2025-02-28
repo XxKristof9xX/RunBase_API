@@ -14,7 +14,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-app.UseCors("https://runbase.hu");
+app.UseCors("https://www.runbase.hu");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
