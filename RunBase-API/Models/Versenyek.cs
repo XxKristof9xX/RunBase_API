@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Runbase_API.Models;
 
 namespace RunBase_API.Models;
 
@@ -19,5 +20,5 @@ public partial class Versenyek
 
     public virtual ICollection<Versenyindulas> Versenyindulas { get; set; } = new List<Versenyindulas>();
 
-    public virtual ICollection<Tavok> Tavs { get; set; } = new List<Tavok>();
+    public virtual ICollection<Versenytav> Versenytavs { get; set; } = new List<Versenytav>();
 }

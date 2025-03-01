@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Runbase_API.Models;
 
 namespace RunBase_API.Models;
 
@@ -19,8 +20,7 @@ public partial class RunBaseDbContext : DbContext
 
     public virtual DbSet<Jogosultsag> Jogosultsags { get; set; }
 
-    public virtual DbSet<Tavok> Tavoks { get; set; }
-
+    public virtual DbSet<Versenytav> Versenytavs { get; set; }
     public virtual DbSet<Versenyek> Versenyeks { get; set; }
 
     public virtual DbSet<Versenyindulas> Versenyindulas { get; set; }
@@ -80,38 +80,7 @@ public partial class RunBaseDbContext : DbContext
                 .HasConstraintName("jogosultsag$jogosultsag_verseny_fk");
         });
 
-        modelBuilder.Entity<Tavok>(entity =>
-        {
-            entity.HasKey(e => e.TavId).HasName("PK_tavok_tavID");
-
-            entity.ToTable("tavok", "runbase");
-
-            entity.HasIndex(e => e.TavId, "tavok$tavID").IsUnique();
-
-            entity.Property(e => e.TavId).HasColumnName("tavID");
-            entity.Property(e => e.Tav).HasColumnName("tav");
-
-            entity.HasMany(d => d.Versenies).WithMany(p => p.Tavs)
-                .UsingEntity<Dictionary<string, object>>(
-                    "Versenytav",
-                    r => r.HasOne<Versenyek>().WithMany()
-                        .HasForeignKey("VersenyId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("versenytav$versenytav_ibfk_2"),
-                    l => l.HasOne<Tavok>().WithMany()
-                        .HasForeignKey("TavId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("versenytav$versenytav_ibfk_1"),
-                    j =>
-                    {
-                        j.HasKey("TavId", "VersenyId").HasName("PK_versenytav_tavID");
-                        j.ToTable("versenytav", "runbase");
-                        j.HasIndex(new[] { "TavId" }, "tavID");
-                        j.HasIndex(new[] { "VersenyId" }, "versenyID");
-                        j.IndexerProperty<int>("TavId").HasColumnName("tavID");
-                        j.IndexerProperty<int>("VersenyId").HasColumnName("versenyID");
-                    });
-        });
+        
 
         modelBuilder.Entity<Versenyek>(entity =>
         {
@@ -157,6 +126,25 @@ public partial class RunBaseDbContext : DbContext
                 .HasForeignKey(d => d.VersenyzoId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("versenyindulas$versenyindulas_ibfk_1");
+        });
+
+        modelBuilder.Entity<Versenytav>(entity =>
+        {
+            entity.HasKey(e => new { e.Tav, e.VersenyId }).HasName("PK_versenytav_tavID");
+
+            entity.ToTable("versenytav", "runbase");
+
+            entity.HasIndex(e => e.Tav, "tavID");
+
+            entity.HasIndex(e => e.VersenyId, "versenyID");
+
+            entity.Property(e => e.Tav).HasColumnName("tav");
+            entity.Property(e => e.VersenyId).HasColumnName("versenyID");
+
+            entity.HasOne(d => d.Verseny).WithMany(p => p.Versenytavs)
+                .HasForeignKey(d => d.VersenyId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("versenytav$versenytav_ibfk_2");
         });
 
         modelBuilder.Entity<Versenyzo>(entity =>
