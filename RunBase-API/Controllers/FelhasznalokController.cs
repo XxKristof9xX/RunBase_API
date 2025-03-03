@@ -90,27 +90,49 @@ namespace RunBase_API.Controllers
         // POST: api/Felhasznalok
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Felhasznalok>> PostFelhasznalok([FromBody] Felhasznalok felhasznalok)
+        public async Task<ActionResult<Felhasznalok>> PostFelhasznalok([FromBody] Felhasznalok felhasznalo)
         {
-
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState+"\nNév: "+felhasznalok.Nev);
+                return BadRequest("Hibás adatok! Kérlek, töltsd ki helyesen a mezőket.");
             }
 
-            if (string.IsNullOrWhiteSpace(felhasznalok.Jelszo))
+            bool felhasznaloLetezik = await _context.Felhasznaloks
+                .AnyAsync(f => f.Nev == felhasznalo.Nev);
+
+            if (felhasznaloLetezik)
+            {
+                return Conflict("Ez a felhasználónév már foglalt! Kérlek, válassz másikat.");
+            }
+
+            if (string.IsNullOrWhiteSpace(felhasznalo.Jelszo))
             {
                 return BadRequest("A jelszó nem lehet üres!");
             }
 
-            // Jelszó hashelése bcrypt segítségével
-            felhasznalok.Jelszo = BCrypt.Net.BCrypt.HashPassword(felhasznalok.Jelszo);
+            try
+            {
+                felhasznalo.Jelszo = BCrypt.Net.BCrypt.HashPassword(felhasznalo.Jelszo);
+                _context.Felhasznaloks.Add(felhasznalo);
+                await _context.SaveChangesAsync();
+                var routeValues = new { id = felhasznalo.Id };
+                var getRoute = Url.Action("GetFelhasznaloById", "Felhasznalok", routeValues);
+                if (string.IsNullOrEmpty(getRoute))
+                {
+                    return Ok(new { message = "Sikeres regisztráció!", id = felhasznalo.Id });
+                }
 
-            _context.Felhasznaloks.Add(felhasznalok);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetFelhasznalok", new { id = felhasznalok.Id }, felhasznalok);
+                return CreatedAtAction("GetFelhasznalok", new { id = felhasznalo.Id }, felhasznalo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Szerverhiba történt: " + ex.Message);
+            }
         }
+
+
+            
+        
 
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login([FromBody] Dictionary<string, string> model)
