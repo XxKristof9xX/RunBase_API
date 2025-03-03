@@ -30,18 +30,30 @@ namespace RunBase_API.Controllers
             return await _context.Felhasznaloks.ToListAsync();
         }
 
-        // GET: api/Felhasznalok/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Felhasznalok>> GetFelhasznalok(int id)
+        // GET: api/Felhasznalok/5 vagy nev 
+        [HttpGet("{idOrUsername}")]
+        public async Task<ActionResult<Felhasznalok>> GetFelhasznalok(string idOrUsername)
         {
-            var felhasznalok = await _context.Felhasznaloks.FindAsync(id);
+            // Próbáljuk meg először ID-ként kezelni
+            if (int.TryParse(idOrUsername, out int id))
+            {
+                var felhasznaloById = await _context.Felhasznaloks.FindAsync(id);
+                if (felhasznaloById != null)
+                {
+                    return felhasznaloById;
+                }
+            }
 
-            if (felhasznalok == null)
+            // Ha nem szám, akkor név alapján keresünk
+            var felhasznaloByName = await _context.Felhasznaloks
+                .FirstOrDefaultAsync(f => f.Nev == idOrUsername);
+
+            if (felhasznaloByName == null)
             {
                 return NotFound();
             }
 
-            return felhasznalok;
+            return felhasznaloByName;
         }
 
         // PUT: api/Felhasznalok/5
