@@ -97,6 +97,17 @@ namespace RunBase_API.Controllers
                 return BadRequest("Hibás adatok! Kérlek, töltsd ki helyesen a mezőket.");
             }
 
+            if (string.IsNullOrWhiteSpace(felhasznalo.Nev) || felhasznalo.Nev.Length < 6)
+            {
+                return BadRequest("A felhasználónévnek legalább 6 karakter hosszúnak kell lennie!");
+            }
+
+            if (string.IsNullOrWhiteSpace(felhasznalo.Jelszo) || felhasznalo.Jelszo.Length < 8)
+            {
+                return BadRequest("A jelszónak legalább 8 karakter hosszúnak kell lennie!");
+            }
+
+
             bool felhasznaloLetezik = await _context.Felhasznaloks
                 .AnyAsync(f => f.Nev == felhasznalo.Nev);
 
