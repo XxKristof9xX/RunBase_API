@@ -28,17 +28,19 @@ namespace RunBase_API.Controllers
         }
 
         // GET: api/Versenyindulas/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Versenyindulas>> GetVersenyindulas(int id)
+        [HttpGet("{versenyzoId}")]
+        public async Task<ActionResult<List<Versenyindulas>>> GetVersenyindulas(int versenyzoId)
         {
-            var versenyindulas = await _context.Versenyindulas.FindAsync(id);
+            var versenyindulasok = await _context.Versenyindulas
+                .Where(v => v.VersenyzoId == versenyzoId)
+                .ToListAsync();
 
-            if (versenyindulas == null)
+            if (versenyindulasok == null || versenyindulasok.Count == 0)
             {
-                return NotFound();
+                return NotFound("Nem található versenyindulás ezzel a VersenyzoId-val.");
             }
 
-            return versenyindulas;
+            return Ok(versenyindulasok);
         }
 
         // PUT: api/Versenyindulas/5
