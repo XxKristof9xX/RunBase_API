@@ -66,7 +66,22 @@ namespace RunBase_API.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(felhasznalok).State = EntityState.Modified;
+            var existingUser = await _context.Felhasznaloks.FindAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound();
+            }
+
+            // Csak azokat az értékeket frissítjük, amelyek nem nullák az új objektumban
+            existingUser.VersenyzoId = felhasznalok.VersenyzoId ?? existingUser.VersenyzoId;
+            existingUser.Nev = !string.IsNullOrEmpty(felhasznalok.Nev) ? felhasznalok.Nev : existingUser.Nev;
+            existingUser.Tipus = !string.IsNullOrEmpty(felhasznalok.Tipus) ? felhasznalok.Tipus : existingUser.Tipus;
+
+            // Ha a jelszó nincs megadva, akkor nem változtatunk rajta
+            if (!string.IsNullOrEmpty(felhasznalok.Jelszo))
+            {
+                existingUser.Jelszo = felhasznalok.Jelszo;
+            }
 
             try
             {
@@ -74,7 +89,7 @@ namespace RunBase_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FelhasznalokExists(id))
+                if (!_context.Felhasznaloks.Any(e => e.Id == id))
                 {
                     return NotFound();
                 }
@@ -86,6 +101,8 @@ namespace RunBase_API.Controllers
 
             return NoContent();
         }
+
+
 
         // POST: api/Felhasznalok
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
