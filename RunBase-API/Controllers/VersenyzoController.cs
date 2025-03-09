@@ -41,6 +41,24 @@ namespace RunBase_API.Controllers
             return versenyzo;
         }
 
+        // GET: api/getByTaj/
+        [HttpGet("getByTaj/{tajszam}")]
+        public async Task<ActionResult<int>> GetVersenyzoIdByTaj(string tajszam)
+        {
+            var versenyzo = await _context.Versenyzos
+                .Where(v => v.TajSzam == tajszam)
+                .Select(v => v.VersenyzoId)
+                .FirstOrDefaultAsync();
+
+            if (versenyzo == 0)
+            {
+                return NotFound(new { message = "A megadott TAJ számmal nem található versenyző." });
+            }
+
+            return Ok(new { versenyzoId = versenyzo });
+        }
+
+
         // PUT: api/Versenyzo/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

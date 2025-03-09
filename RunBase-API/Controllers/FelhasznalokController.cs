@@ -72,12 +72,10 @@ namespace RunBase_API.Controllers
                 return NotFound();
             }
 
-            // Csak azokat az értékeket frissítjük, amelyek nem nullák vagy üresek az új objektumban
             existingUser.VersenyzoId = felhasznalok.VersenyzoId ?? existingUser.VersenyzoId;
             existingUser.Nev = !string.IsNullOrEmpty(felhasznalok.Nev) ? felhasznalok.Nev : existingUser.Nev;
             existingUser.Tipus = !string.IsNullOrEmpty(felhasznalok.Tipus) ? felhasznalok.Tipus : existingUser.Tipus;
 
-            // Jelszó módosítása csak akkor, ha van új érték
             if (!string.IsNullOrEmpty(felhasznalok.Jelszo))
             {
                 existingUser.Jelszo = felhasznalok.Jelszo;
