@@ -60,27 +60,29 @@ public partial class RunBaseDbContext : DbContext
 
         modelBuilder.Entity<Jogosultsag>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("jogosultsag", "runbase");
+            entity.HasKey(e => new { e.FelhasznaloId, e.VersenyId });
+
+            entity.ToTable("jogosultsag", "runbase");
 
             entity.HasIndex(e => e.FelhasznaloId, "jogosultsag_felhasznalo_fk");
-
             entity.HasIndex(e => e.VersenyId, "jogosultsag_verseny_fk");
 
             entity.Property(e => e.FelhasznaloId).HasColumnName("felhasznaloID");
             entity.Property(e => e.VersenyId).HasColumnName("versenyID");
 
-            entity.HasOne(d => d.Felhasznalo).WithMany()
+            entity.HasOne(d => d.Felhasznalo)
+                .WithMany()
                 .HasForeignKey(d => d.FelhasznaloId)
                 .HasConstraintName("jogosultsag$jogosultsag_felhasznalo_fk");
 
-            entity.HasOne(d => d.Verseny).WithMany()
+            entity.HasOne(d => d.Verseny)
+                .WithMany()
                 .HasForeignKey(d => d.VersenyId)
                 .HasConstraintName("jogosultsag$jogosultsag_verseny_fk");
         });
 
-        
+
+
 
         modelBuilder.Entity<Versenyek>(entity =>
         {
