@@ -17,7 +17,7 @@ public partial class Versenyindulas
 
     public int Rajtszam { get; set; }
 
-    public virtual Versenyek Verseny { get; set; } = null!;
+    public virtual Versenyek Verseny { get; set; }
 
-    public virtual Versenyzo Versenyzo { get; set; } = null!;
+    public virtual Versenyzo Versenyzo { get; set; }
 }

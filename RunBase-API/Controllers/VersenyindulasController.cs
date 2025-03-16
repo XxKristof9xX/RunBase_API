@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -77,9 +78,19 @@ namespace RunBase_API.Controllers
         // POST: api/Versenyindulas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Versenyindulas>> PostVersenyindulas(Versenyindulas versenyindulas)
+        public async Task<ActionResult<Versenyindulas>> PostVersenyindulas([FromBody] Versenyindulas versenyindulas)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // A navigációs property-k nullázása, hogy ne okozzanak hibát
+            versenyindulas.Verseny = null;
+            versenyindulas.Versenyzo = null;
+
             _context.Versenyindulas.Add(versenyindulas);
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -96,8 +107,9 @@ namespace RunBase_API.Controllers
                 }
             }
 
-            return CreatedAtAction("GetVersenyindulas", new { id = versenyindulas.VersenyzoId }, versenyindulas);
+            return CreatedAtAction(nameof(GetVersenyindulas), new { id = versenyindulas.VersenyzoId }, versenyindulas);
         }
+
 
         // DELETE: api/Versenyindulas/5
         [HttpDelete("{id}")]
