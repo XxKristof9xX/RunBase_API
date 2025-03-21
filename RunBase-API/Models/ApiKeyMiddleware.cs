@@ -23,19 +23,19 @@ public class ApiKeyMiddleware
 
         if (!context.Request.Headers.TryGetValue(API_KEY_NAME, out var extractedApiKey))
         {
-            context.Response.StatusCode = 401; 
+            context.Response.StatusCode = 401;
             await context.Response.WriteAsync("API kulcs szükséges!");
-            Console.WriteLine("Nincs API kulcs a headerben.");
             return;
         }
 
         var apiKey = extractedApiKey.ToString().Replace("Bearer ", "").Trim();
         if (string.IsNullOrEmpty(apiKey))
         {
-            context.Response.StatusCode = 403; 
+            context.Response.StatusCode = 403;
             await context.Response.WriteAsync("Érvénytelen API kulcs!");
             return;
         }
+
         if (!_validApiKeys.TryGetValue(apiKey, out var apiKeyData) || apiKeyData.expiryTime < DateTime.UtcNow)
         {
             context.Response.StatusCode = 403;
@@ -43,8 +43,36 @@ public class ApiKeyMiddleware
             return;
         }
 
+        var userRole = apiKeyData.role;
+
+        if (userRole == "admin")
+        {
+            await _next(context);
+            return;
+        }
+
+        if (userRole == "user" || userRole == "competitor")
+        {
+            if (context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok"))
+            {
+                context.Response.StatusCode = 403;
+                await context.Response.WriteAsync("Nincs megfelelő jogosultság!");
+                return;
+            }
+        }
+        if (userRole == "organizer" &&
+            context.Request.Path.StartsWithSegments("/api/felhasznalok") &&
+            context.Request.Method != "GET")
+        {
+            context.Response.StatusCode = 403;
+            await context.Response.WriteAsync("Nincs megfelelő jogosultság a felhasználók módosításához!");
+            return;
+        }
+
         await _next(context);
     }
+
+
 
     public static string GenerateApiKey(string role)
     {
@@ -54,7 +82,7 @@ public class ApiKeyMiddleware
             throw new Exception("Nem sikerült az API kulcs mentése!");
         }
 
-        return apiKey; // Az API kulcs visszaadása
+        return apiKey; 
     }
     public static void InvalidateApiKey(string apiKey)
     {

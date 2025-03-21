@@ -15,7 +15,7 @@ public partial class Felhasznalok
 
     public string? Jelszo { get; set; }
 
-    [RegularExpression("^(user|competitor|organizer|administrator)$", ErrorMessage = "Érvénytelen felhasználói típus.")]
+    [RegularExpression("^(user|competitor|organizer|admin)$", ErrorMessage = "Érvénytelen felhasználói típus.")]
     public string Tipus { get; set; } = "user";
 
     public virtual Versenyzo? Versenyzo { get; set; }
