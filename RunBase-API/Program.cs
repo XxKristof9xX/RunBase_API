@@ -33,6 +33,8 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowSpecificOrigin");
 
+app.UseMiddleware<ApiKeyMiddleware>();
+
 app.UseAuthorization();
 
 app.MapControllers();

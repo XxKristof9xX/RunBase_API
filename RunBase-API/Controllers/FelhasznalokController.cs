@@ -176,7 +176,7 @@ namespace RunBase_API.Controllers
                 return Unauthorized("Hibás felhasználónév vagy jelszó.");
             }
 
-            string apiKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+            string apiKey = ApiKeyMiddleware.GenerateApiKey();
 
             return Ok(new { message = "Sikeres bejelentkezés!", apiKey });
         }
