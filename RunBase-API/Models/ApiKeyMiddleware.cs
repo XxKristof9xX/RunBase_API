@@ -1,10 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 public class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
     private const string API_KEY_NAME = "Authorization";
-    private static readonly ConcurrentDictionary<string, DateTime> _validApiKeys = new();
+    private static readonly ConcurrentDictionary<string, (DateTime expiryTime, string role)> _validApiKeys = new();
 
     public ApiKeyMiddleware(RequestDelegate next)
     {
@@ -35,7 +36,7 @@ public class ApiKeyMiddleware
             await context.Response.WriteAsync("Érvénytelen API kulcs!");
             return;
         }
-        if (!_validApiKeys.TryGetValue(apiKey, out var expiryTime) || expiryTime < DateTime.UtcNow)
+        if (!_validApiKeys.TryGetValue(apiKey, out var apiKeyData) || apiKeyData.expiryTime < DateTime.UtcNow)
         {
             context.Response.StatusCode = 403;
             await context.Response.WriteAsync("Hibás vagy lejárt API kulcs!");
@@ -45,14 +46,15 @@ public class ApiKeyMiddleware
         await _next(context);
     }
 
-    public static string GenerateApiKey()
+    public static string GenerateApiKey(string role)
     {
         var apiKey = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-        if (!_validApiKeys.TryAdd(apiKey, DateTime.UtcNow.AddHours(1)))
+        if (!_validApiKeys.TryAdd(apiKey, (DateTime.UtcNow.AddHours(1), role)))
         {
             throw new Exception("Nem sikerült az API kulcs mentése!");
         }
-        return apiKey;
+
+        return apiKey; // Az API kulcs visszaadása
     }
     public static void InvalidateApiKey(string apiKey)
     {

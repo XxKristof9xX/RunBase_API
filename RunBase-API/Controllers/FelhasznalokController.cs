@@ -158,8 +158,8 @@ namespace RunBase_API.Controllers
         }
 
 
-            
-        
+
+
 
         [HttpPost("login")]
         public async Task<ActionResult<string>> Login([FromBody] Dictionary<string, string> model)
@@ -176,7 +176,7 @@ namespace RunBase_API.Controllers
                 return Unauthorized("Hibás felhasználónév vagy jelszó.");
             }
 
-            string apiKey = ApiKeyMiddleware.GenerateApiKey();
+            string apiKey = ApiKeyMiddleware.GenerateApiKey(user.Tipus);
 
             return Ok(new { message = "Sikeres bejelentkezés!", apiKey });
         }
