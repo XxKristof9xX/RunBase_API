@@ -157,12 +157,8 @@ namespace RunBase_API.Controllers
             }
         }
 
-
-
-
-
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login([FromBody] Dictionary<string, string> model)
+        public async Task<ActionResult<object>> Login([FromBody] Dictionary<string, string> model)
         {
             if (!model.TryGetValue("Nev", out string? nev) || !model.TryGetValue("Jelszo", out string? jelszo))
             {
@@ -178,8 +174,20 @@ namespace RunBase_API.Controllers
 
             string apiKey = ApiKeyMiddleware.GenerateApiKey(user.Tipus);
 
-            return Ok(new { message = "Sikeres bejelentkezés!", apiKey });
+            return Ok(new
+            {
+                message = "Sikeres bejelentkezés!",
+                apiKey,
+                user = new
+                {
+                    user.Id,
+                    user.Nev,
+                    user.Tipus,
+                    user.VersenyzoId
+                }
+            });
         }
+
 
 
         // DELETE: api/Felhasznalok/5
