@@ -58,6 +58,37 @@ namespace RunBase_API.Controllers
             return Ok(new { versenyzoId = versenyzo });
         }
 
+        [HttpPut("addVersenyzo")]
+        public async Task<IActionResult> AddVersenyzoToUser([FromBody] AddVersenyzoRequest request)
+        {
+            var versenyzoId = await _context.Versenyzos
+                .Where(v => v.TajSzam == request.TajSzam)
+                .Select(v => v.VersenyzoId)
+                .FirstOrDefaultAsync();
+
+            if (versenyzoId == 0)
+            {
+                return NotFound(new { message = "A megadott TAJ számmal nem található versenyző." });
+            }
+
+            var user = await _context.Felhasznaloks.FindAsync(request.FelhasznaloId);
+            if (user == null)
+            {
+                return NotFound(new { message = "A megadott felhasználó nem található." });
+            }
+
+            user.VersenyzoId = versenyzoId;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "A versenyző sikeresen hozzá lett adva a felhasználóhoz.", versenyzoId });
+        }
+
+        public class AddVersenyzoRequest
+        {
+            public string TajSzam { get; set; }
+            public int FelhasznaloId { get; set; }
+        }
+
 
         // PUT: api/Versenyzo/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
