@@ -53,15 +53,14 @@ public class ApiKeyMiddleware
 
         if (userRole == "user" || userRole == "competitor")
         {
-            if (context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok") || !context.Request.Path.StartsWithSegments("/api/felhasznalok/addVersenyzo"))
+            if ((context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok")) && !context.Request.Path.StartsWithSegments("/api/versenyzo/addVersenyzo"))
             {
                 context.Response.StatusCode = 403;
                 await context.Response.WriteAsync("Nincs megfelelő jogosultság!");
                 return;
             }
         }
-        if (userRole == "organizer" &&
-            context.Request.Path.StartsWithSegments("/api/felhasznalok") &&
+        if (userRole == "organizer" && context.Request.Path.StartsWithSegments("/api/felhasznalok") &&
             context.Request.Method != "GET")
         {
             context.Response.StatusCode = 403;

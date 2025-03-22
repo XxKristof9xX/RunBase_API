@@ -78,6 +78,7 @@ namespace RunBase_API.Controllers
             }
 
             user.VersenyzoId = versenyzoId;
+            user.Tipus = "competitor";
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "A versenyző sikeresen hozzá lett adva a felhasználóhoz.", versenyzoId });
