@@ -14,8 +14,19 @@ public class ApiKeyMiddleware
 
     public async Task Invoke(HttpContext context)
     {
-        var allowedPaths = new[] { "/api/felhasznalok/login", "/api/versenyek" };
-        if (allowedPaths.Any(path => context.Request.Path.StartsWithSegments(path)))
+        var allowedPathsWithoutKey = new[]
+        {
+        "/api/felhasznalok/login",
+        "/api/versenyek"
+        };
+
+        if (allowedPathsWithoutKey.Any(path => context.Request.Path.StartsWithSegments(path) && context.Request.Method == "GET"))
+        {
+            await _next(context);
+            return;
+        }
+
+        if (context.Request.Path.StartsWithSegments("/api/felhasznalok") && context.Request.Method == "POST")
         {
             await _next(context);
             return;

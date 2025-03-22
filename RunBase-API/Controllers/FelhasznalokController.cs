@@ -9,6 +9,7 @@ using RunBase_API.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Security.Cryptography;
 using BCrypt.Net;
+using System.Text.Json;
 
 namespace RunBase_API.Controllers
 {
@@ -106,56 +107,61 @@ namespace RunBase_API.Controllers
         // POST: api/Felhasznalok
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Felhasznalok>> PostFelhasznalok([FromBody] Felhasznalok felhasznalo)
+        public async Task<ActionResult<Felhasznalok>> PostFelhasznalok([FromBody] JsonElement jsonData)
         {
-            if (!ModelState.IsValid)
+            if (!jsonData.TryGetProperty("nev", out var nevElement) || !jsonData.TryGetProperty("jelszo", out var jelszoElement))
             {
-                return BadRequest("Hibás adatok! Kérlek, töltsd ki helyesen a mezőket.");
+                return BadRequest("Csak a 'nev' és 'jelszo' mezők engedélyezettek!");
             }
 
-            if (string.IsNullOrWhiteSpace(felhasznalo.Nev) || felhasznalo.Nev.Length < 6)
+            var nev = nevElement.GetString();
+            var jelszo = jelszoElement.GetString();
+
+            if (string.IsNullOrWhiteSpace(nev) || nev.Length < 6)
             {
                 return BadRequest("A felhasználónévnek legalább 6 karakter hosszúnak kell lennie!");
             }
 
-            if (string.IsNullOrWhiteSpace(felhasznalo.Jelszo) || felhasznalo.Jelszo.Length < 8)
+            if (string.IsNullOrWhiteSpace(jelszo) || jelszo.Length < 8)
             {
                 return BadRequest("A jelszónak legalább 8 karakter hosszúnak kell lennie!");
             }
 
-
-            bool felhasznaloLetezik = await _context.Felhasznaloks
-                .AnyAsync(f => f.Nev == felhasznalo.Nev);
-
+            bool felhasznaloLetezik = await _context.Felhasznaloks.AnyAsync(f => f.Nev == nev);
             if (felhasznaloLetezik)
             {
                 return Conflict("Ez a felhasználónév már foglalt! Kérlek, válassz másikat.");
             }
 
-            if (string.IsNullOrWhiteSpace(felhasznalo.Jelszo))
-            {
-                return BadRequest("A jelszó nem lehet üres!");
-            }
-
             try
             {
-                felhasznalo.Jelszo = BCrypt.Net.BCrypt.HashPassword(felhasznalo.Jelszo);
+                var felhasznalo = new Felhasznalok
+                {
+                    Nev = nev,
+                    Jelszo = BCrypt.Net.BCrypt.HashPassword(jelszo)
+                };
+
                 _context.Felhasznaloks.Add(felhasznalo);
                 await _context.SaveChangesAsync();
+
+                // Ellenőrizzük, hogy a GetFelhasznalok létezik-e
                 var routeValues = new { id = felhasznalo.Id };
                 var getRoute = Url.Action("GetFelhasznaloById", "Felhasznalok", routeValues);
+
                 if (string.IsNullOrEmpty(getRoute))
                 {
                     return Ok(new { message = "Sikeres regisztráció!", id = felhasznalo.Id });
                 }
 
-                return CreatedAtAction("GetFelhasznalok", new { id = felhasznalo.Id }, felhasznalo);
+                return CreatedAtAction("GetFelhasznaloById", new { id = felhasznalo.Id }, felhasznalo);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Szerverhiba történt: " + ex.Message);
+                return StatusCode(500, $"Szerverhiba történt: {ex.Message}");
             }
         }
+
+
 
         [HttpPost("login")]
         public async Task<ActionResult<object>> Login([FromBody] Dictionary<string, string> model)
