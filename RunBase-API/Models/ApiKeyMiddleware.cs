@@ -53,7 +53,7 @@ public class ApiKeyMiddleware
 
         if (userRole == "user" || userRole == "competitor")
         {
-            if (context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok"))
+            if (context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok") || !context.Request.Path.StartsWithSegments("/api/felhasznalok/addVersenyzo"))
             {
                 context.Response.StatusCode = 403;
                 await context.Response.WriteAsync("Nincs megfelelő jogosultság!");
