@@ -93,16 +93,26 @@ public partial class RunBaseDbContext : DbContext
             entity.Property(e => e.VersenyId)
                 .ValueGeneratedNever()
                 .HasColumnName("versenyID");
+
             entity.Property(e => e.Datum).HasColumnName("datum");
+
             entity.Property(e => e.Helyszin)
                 .HasMaxLength(100)
                 .HasColumnName("helyszin");
+
             entity.Property(e => e.Leiras).HasColumnName("leiras");
+
             entity.Property(e => e.MaxLetszam).HasColumnName("max_letszam");
+
             entity.Property(e => e.Nev)
                 .HasMaxLength(100)
                 .HasColumnName("nev");
+
+            entity.Property(e => e.Kep)
+                .HasColumnName("kep")
+                .HasColumnType("VARBINARY(MAX)");
         });
+
 
         modelBuilder.Entity<Versenyindulas>(entity =>
         {

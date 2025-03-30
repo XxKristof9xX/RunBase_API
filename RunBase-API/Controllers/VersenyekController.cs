@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RunBase_API.Models;
+using System.IO;
 
 namespace RunBase_API.Controllers
 {
@@ -20,16 +21,27 @@ namespace RunBase_API.Controllers
             _context = context;
         }
 
-        // GET: api/Versenyek
+        // GET: api/Versenyek - Versenyek listázása képpel
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Versenyek>>> GetVersenyeks()
+        public async Task<ActionResult<IEnumerable<object>>> GetVersenyeks()
         {
-            return await _context.Versenyeks.ToListAsync();
+            var versenyek = await _context.Versenyeks.ToListAsync();
+
+            return versenyek.Select(v => new
+            {
+                v.VersenyId,
+                v.Nev,
+                v.Helyszin,
+                v.Datum,
+                v.Leiras,
+                v.MaxLetszam,
+                Kep = v.Kep != null ? Convert.ToBase64String(v.Kep) : null
+            }).ToList();
         }
 
         // GET: api/Versenyek/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Versenyek>> GetVersenyek(int id)
+        public async Task<ActionResult<object>> GetVersenyek(int id)
         {
             var versenyek = await _context.Versenyeks.FindAsync(id);
 
@@ -38,20 +50,60 @@ namespace RunBase_API.Controllers
                 return NotFound();
             }
 
-            return versenyek;
+            return new
+            {
+                versenyek.VersenyId,
+                versenyek.Nev,
+                versenyek.Helyszin,
+                versenyek.Datum,
+                versenyek.Leiras,
+                versenyek.MaxLetszam,
+                Kep = versenyek.Kep != null ? Convert.ToBase64String(versenyek.Kep) : null
+            };
         }
 
-        // PUT: api/Versenyek/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutVersenyek(int id, Versenyek versenyek)
+        // POST: api/Versenyek - Új verseny létrehozása képpel
+        [HttpPost]
+        public async Task<ActionResult<Versenyek>> PostVersenyek([FromForm] VersenyCreateDto model)
         {
-            if (id != versenyek.VersenyId)
+            var verseny = new Versenyek
             {
-                return BadRequest();
+                Nev = model.Nev,
+                Helyszin = model.Helyszin,
+                Datum = model.Datum,
+                Leiras = model.Leiras,
+                MaxLetszam = model.MaxLetszam,
+                Kep = model.Kep != null ? ConvertFileToBytes(model.Kep) : null
+            };
+
+            _context.Versenyeks.Add(verseny);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetVersenyek", new { id = verseny.VersenyId }, verseny);
+        }
+
+        [HttpPut("{id}")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> PutVersenyek(int id, [FromForm] VersenyUpdateDto versenyUpdateDto)
+        {
+            var verseny = await _context.Versenyeks.FindAsync(id);
+            if (verseny == null)
+            {
+                return NotFound();
+            }
+            verseny.Nev = versenyUpdateDto.Nev;
+            verseny.Helyszin = versenyUpdateDto.Helyszin;
+            verseny.Datum = versenyUpdateDto.Datum;
+            verseny.Leiras = versenyUpdateDto.Leiras;
+            verseny.MaxLetszam = versenyUpdateDto.MaxLetszam;
+            if (versenyUpdateDto.Kep != null)
+            {
+                using var ms = new MemoryStream();
+                await versenyUpdateDto.Kep.CopyToAsync(ms);
+                verseny.Kep = ms.ToArray();
             }
 
-            _context.Entry(versenyek).State = EntityState.Modified;
+            _context.Entry(verseny).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +111,7 @@ namespace RunBase_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!VersenyekExists(id))
+                if (!_context.Versenyeks.Any(e => e.VersenyId == id))
                 {
                     return NotFound();
                 }
@@ -70,31 +122,6 @@ namespace RunBase_API.Controllers
             }
 
             return NoContent();
-        }
-
-        // POST: api/Versenyek
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Versenyek>> PostVersenyek(Versenyek versenyek)
-        {
-            _context.Versenyeks.Add(versenyek);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (VersenyekExists(versenyek.VersenyId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetVersenyek", new { id = versenyek.VersenyId }, versenyek);
         }
 
         // DELETE: api/Versenyek/5
@@ -117,5 +144,32 @@ namespace RunBase_API.Controllers
         {
             return _context.Versenyeks.Any(e => e.VersenyId == id);
         }
+
+        private static byte[] ConvertFileToBytes(IFormFile file)
+        {
+            using var ms = new MemoryStream();
+            file.CopyTo(ms);
+            return ms.ToArray();
+        }
+    }
+
+    public class VersenyCreateDto
+    {
+        public string Nev { get; set; } = null!;
+        public string Helyszin { get; set; } = null!;
+        public DateOnly Datum { get; set; }
+        public string Leiras { get; set; } = null!;
+        public int MaxLetszam { get; set; }
+        public IFormFile? Kep { get; set; }
+    }
+
+    public class VersenyUpdateDto
+    {
+        public string Nev { get; set; } = null!;
+        public string Helyszin { get; set; } = null!;
+        public DateOnly Datum { get; set; }
+        public string Leiras { get; set; } = null!;
+        public int MaxLetszam { get; set; }
+        public IFormFile? Kep { get; set; } // A kép opcionális
     }
 }
