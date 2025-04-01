@@ -17,7 +17,8 @@ public class ApiKeyMiddleware
         var allowedPathsWithoutKey = new[]
         {
         "/api/felhasznalok/login",
-        "/api/versenyek"
+        "/api/versenyek",
+        "/api/forum"
         };
 
         if (allowedPathsWithoutKey.Any(path => context.Request.Path.StartsWithSegments(path) && context.Request.Method == "GET"))
