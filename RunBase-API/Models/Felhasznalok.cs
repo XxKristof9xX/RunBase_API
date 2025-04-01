@@ -19,4 +19,5 @@ public partial class Felhasznalok
     public string Tipus { get; set; } = "user";
 
     public virtual Versenyzo? Versenyzo { get; set; }
+    public virtual ICollection<Forum> ForumBejegyzesek { get; set; } = new List<Forum>();
 }

@@ -26,6 +26,7 @@ public partial class RunBaseDbContext : DbContext
     public virtual DbSet<Versenyindulas> Versenyindulas { get; set; }
 
     public virtual DbSet<Versenyzo> Versenyzos { get; set; }
+    public virtual DbSet<Forum> ForumBejegyzesek { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -176,6 +177,26 @@ public partial class RunBaseDbContext : DbContext
             entity.Property(e => e.TajSzam)
                 .HasMaxLength(100)
                 .HasColumnName("taj_szam");
+        });
+
+        modelBuilder.Entity<Forum>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_forum_Id");
+            entity.ToTable("forum", "runbase");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.FelhasznaloId).HasColumnName("felhasznaloId");
+            entity.Property(e => e.Tartalom).HasColumnName("tartalom").IsRequired();
+            entity.Property(e => e.Kep).HasColumnName("kep").HasColumnType("VARBINARY(MAX)");
+            entity.Property(e => e.Datum)
+                .HasColumnName("datum")
+                .HasDefaultValueSql("GETDATE()");
+
+            entity.HasOne(d => d.Felhasznalo)
+                .WithMany(p => p.ForumBejegyzesek)
+                .HasForeignKey(d => d.FelhasznaloId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("forum$felhasznalo_fk");
         });
 
         OnModelCreatingPartial(modelBuilder);
