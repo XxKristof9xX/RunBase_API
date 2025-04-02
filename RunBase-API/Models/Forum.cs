@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace RunBase_API.Models
 {
@@ -21,6 +22,7 @@ namespace RunBase_API.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime Datum { get; set; } = DateTime.UtcNow;
 
+        [JsonIgnore]
         [ForeignKey("FelhasznaloId")]
         public virtual Felhasznalok Felhasznalo { get; set; } = null!;
     }

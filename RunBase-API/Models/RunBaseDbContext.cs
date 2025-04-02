@@ -185,7 +185,7 @@ public partial class RunBaseDbContext : DbContext
             entity.ToTable("forum", "runbase");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.FelhasznaloId).HasColumnName("felhasznaloId");
+            entity.Property(e => e.FelhasznaloId).HasColumnName("felhasznaloId").IsRequired();
             entity.Property(e => e.Tartalom).HasColumnName("tartalom").IsRequired();
             entity.Property(e => e.Kep).HasColumnName("kep").HasColumnType("VARBINARY(MAX)");
             entity.Property(e => e.Datum)

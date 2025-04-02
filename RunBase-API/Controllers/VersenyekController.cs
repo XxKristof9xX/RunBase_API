@@ -170,6 +170,6 @@ namespace RunBase_API.Controllers
         public DateOnly Datum { get; set; }
         public string Leiras { get; set; } = null!;
         public int MaxLetszam { get; set; }
-        public IFormFile? Kep { get; set; } // A kép opcionális
+        public IFormFile? Kep { get; set; }
     }
 }

@@ -75,13 +75,27 @@ namespace RunBase_API.Controllers
         // POST: api/Forum
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Forum>> PostForum(Forum forum)
+        public async Task<ActionResult<Forum>> PostForum([FromForm] ForumCreateDto model)
         {
+            var felhasznalo = await _context.Felhasznaloks.FindAsync(model.FelhasznaloId);
+            if (felhasznalo == null)
+            {
+                return BadRequest(new { message = "Hibás FelhasznaloId: a felhasználó nem létezik." });
+            }
+
+            var forum = new Forum
+            {
+                FelhasznaloId = model.FelhasznaloId,
+                Tartalom = model.Tartalom,
+                Kep = model.Kep != null ? ConvertFileToBytes(model.Kep) : null,
+                Datum = DateTime.UtcNow
+            };
+
             _context.ForumBejegyzesek.Add(forum);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetForum", new { id = forum.Id }, forum);
+            return CreatedAtAction(nameof(GetForum), new { id = forum.Id }, forum);
         }
+
 
         // DELETE: api/Forum/5
         [HttpDelete("{id}")]
@@ -103,5 +117,22 @@ namespace RunBase_API.Controllers
         {
             return _context.ForumBejegyzesek.Any(e => e.Id == id);
         }
+
+        private byte[] ConvertFileToBytes(IFormFile file)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                file.CopyTo(memoryStream);
+                return memoryStream.ToArray();
+            }
+        }
+
+        public class ForumCreateDto
+        {
+            public int FelhasznaloId { get; set; }
+            public string Tartalom { get; set; } = string.Empty;
+            public IFormFile? Kep { get; set; }
+        }
     }
+    
 }

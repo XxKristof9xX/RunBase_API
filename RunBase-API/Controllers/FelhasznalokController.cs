@@ -35,7 +35,6 @@ namespace RunBase_API.Controllers
         [HttpGet("{idOrUsername}")]
         public async Task<ActionResult<Felhasznalok>> GetFelhasznalok(string idOrUsername)
         {
-            // Próbáljuk meg először ID-ként kezelni
             if (int.TryParse(idOrUsername, out int id))
             {
                 var felhasznaloById = await _context.Felhasznaloks.FindAsync(id);
@@ -44,8 +43,6 @@ namespace RunBase_API.Controllers
                     return felhasznaloById;
                 }
             }
-
-            // Ha nem szám, akkor név alapján keresünk
             var felhasznaloByName = await _context.Felhasznaloks
                 .FirstOrDefaultAsync(f => f.Nev == idOrUsername);
 
@@ -143,8 +140,6 @@ namespace RunBase_API.Controllers
 
                 _context.Felhasznaloks.Add(felhasznalo);
                 await _context.SaveChangesAsync();
-
-                // Ellenőrizzük, hogy a GetFelhasznalok létezik-e
                 var routeValues = new { id = felhasznalo.Id };
                 var getRoute = Url.Action("GetFelhasznaloById", "Felhasznalok", routeValues);
 
