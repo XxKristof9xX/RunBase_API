@@ -65,7 +65,11 @@ public class ApiKeyMiddleware
 
         if (userRole == "user" || userRole == "competitor")
         {
-            if ((context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok")) && !context.Request.Path.StartsWithSegments("/api/versenyzo/addVersenyzo"))
+            if ((
+            (context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok")) &&
+            !context.Request.Path.StartsWithSegments("/api/versenyzo/addVersenyzo")
+        ) &&
+        !(context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/forum")))
             {
                 context.Response.StatusCode = 403;
                 await context.Response.WriteAsync("Nincs megfelelő jogosultság!");
