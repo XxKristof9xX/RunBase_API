@@ -138,7 +138,7 @@ namespace RunBase_API.Controllers
             return Ok(new
             {
                 message = "Versenyzői adatok sikeresen mentve.",
-                versenyzoId = versenyzo.VersenyzoId
+                tajSzam = versenyzo.TajSzam
             });
         }
 
