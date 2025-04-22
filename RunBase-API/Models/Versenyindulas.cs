@@ -11,9 +11,9 @@ public partial class Versenyindulas
 
     public int Tav { get; set; }
 
-    public string Indulas { get; set; } = null!;
+    public string Indulas { get; set; }
 
-    public string Erkezes { get; set; } = null!;
+    public string Erkezes { get; set; }
 
     public int Rajtszam { get; set; }
 

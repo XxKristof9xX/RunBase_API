@@ -122,6 +122,28 @@ namespace RunBase_API.Controllers
             return NoContent();
         }
 
+        // POST: api/Versenyzo/hozzaad
+        [HttpPost("hozzaad")]
+        public async Task<IActionResult> HozzaadVersenyzoAdatokat([FromBody] Versenyzo versenyzo)
+        {
+            bool exists = await _context.Versenyzos.AnyAsync(v => v.TajSzam == versenyzo.TajSzam);
+            if (exists)
+            {
+                return Conflict("Ez a TAJ szám már szerepel egy versenyzőnél.");
+            }
+
+            _context.Versenyzos.Add(versenyzo);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Versenyzői adatok sikeresen mentve.",
+                versenyzoId = versenyzo.VersenyzoId
+            });
+        }
+
+
+
         // POST: api/Versenyzo
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]

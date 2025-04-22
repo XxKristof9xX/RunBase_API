@@ -33,6 +33,12 @@ public class ApiKeyMiddleware
             return;
         }
 
+        if (context.Request.Path.StartsWithSegments("/api/versenyzo/hozzaad") && context.Request.Method == "POST")
+        {
+            await _next(context);
+            return;
+        }
+
         if (!context.Request.Headers.TryGetValue(API_KEY_NAME, out var extractedApiKey))
         {
             context.Response.StatusCode = 401;
