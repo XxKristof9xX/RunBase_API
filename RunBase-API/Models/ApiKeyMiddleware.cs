@@ -18,7 +18,8 @@ public class ApiKeyMiddleware
         {
         "/api/felhasznalok/login",
         "/api/versenyek",
-        "/api/forum"
+        "/api/forum",
+        "/api/versenzo/addVersenyzo"
         };
 
         if (allowedPathsWithoutKey.Any(path => context.Request.Path.StartsWithSegments(path) && context.Request.Method == "GET"))
@@ -34,6 +35,12 @@ public class ApiKeyMiddleware
         }
 
         if (context.Request.Path.StartsWithSegments("/api/versenyzo/hozzaad") && context.Request.Method == "POST")
+        {
+            await _next(context);
+            return;
+        }
+
+        if (context.Request.Path.StartsWithSegments("/api/versenyzo/addVersenyzo") && context.Request.Method == "PUT")
         {
             await _next(context);
             return;
