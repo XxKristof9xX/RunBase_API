@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 public class ApiKeyMiddleware
 {
@@ -16,10 +15,10 @@ public class ApiKeyMiddleware
     {
         var allowedPathsWithoutKey = new[]
         {
-        "/api/felhasznalok/login",
-        "/api/versenyek",
-        "/api/forum",
-        "/api/versenzo/addVersenyzo"
+            "/api/felhasznalok/login",
+            "/api/versenyek",
+            "/api/forum",
+            "/api/versenzo/addVersenyzo"
         };
 
         if (allowedPathsWithoutKey.Any(path => context.Request.Path.StartsWithSegments(path) && context.Request.Method == "GET"))
@@ -70,26 +69,45 @@ public class ApiKeyMiddleware
 
         var userRole = apiKeyData.role;
 
+        // Adminnak teljes hozzáférés
         if (userRole == "admin")
         {
             await _next(context);
             return;
         }
 
+        // Csak competitor, organizer vagy admin jelentkezhet versenyre
+        if (context.Request.Path.StartsWithSegments("/api/versenyindulas/jelentkezes") &&
+            context.Request.Method == "POST")
+        {
+            if (userRole != "competitor" && userRole != "organizer" && userRole != "admin")
+            {
+                context.Response.StatusCode = 403;
+                await context.Response.WriteAsync("Csak competitor, organizer vagy admin jelentkezhet versenyre!");
+                return;
+            }
+        }
+
+        // Felhasználói szintű korlátozások (user vagy competitor)
         if (userRole == "user" || userRole == "competitor")
         {
-            if ((
-            (context.Request.Method != "GET" || context.Request.Path.StartsWithSegments("/api/felhasznalok")) &&
-            !context.Request.Path.StartsWithSegments("/api/versenyzo/addVersenyzo")
-        ) &&
-        !(context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/forum")))
+            if (
+                !(context.Request.Method == "GET" && !context.Request.Path.StartsWithSegments("/api/felhasznalok")) &&
+                !context.Request.Path.StartsWithSegments("/api/versenyzo/addVersenyzo") &&
+                !(context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/forum")) &&
+                !(context.Request.Method == "POST" && context.Request.Path.StartsWithSegments("/api/versenyindulas/jelentkezes") && userRole == "competitor")
+            )
             {
                 context.Response.StatusCode = 403;
                 await context.Response.WriteAsync("Nincs megfelelő jogosultság!");
                 return;
             }
         }
-        if (userRole == "organizer" && context.Request.Path.StartsWithSegments("/api/felhasznalok") &&
+
+
+        // Organizer nem módosíthat felhasználót
+        if (userRole == "organizer" &&
+            context.Request.Path.StartsWithSegments("/api/felhasznalok") &&
             context.Request.Method != "GET")
         {
             context.Response.StatusCode = 403;
@@ -100,8 +118,6 @@ public class ApiKeyMiddleware
         await _next(context);
     }
 
-
-
     public static string GenerateApiKey(string role)
     {
         var apiKey = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
@@ -109,9 +125,9 @@ public class ApiKeyMiddleware
         {
             throw new Exception("Nem sikerült az API kulcs mentése!");
         }
-
-        return apiKey; 
+        return apiKey;
     }
+
     public static void InvalidateApiKey(string apiKey)
     {
         _validApiKeys.TryRemove(apiKey, out _);

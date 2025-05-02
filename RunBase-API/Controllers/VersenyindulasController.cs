@@ -75,6 +75,56 @@ namespace RunBase_API.Controllers
             return NoContent();
         }
 
+        [HttpPost("jelentkezes")]
+        public async Task<ActionResult<Versenyindulas>> Jelentkezes([FromBody] JelentkezesDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var versenyzoLetezik = await _context.Versenyzos.AnyAsync(v => v.VersenyzoId == dto.VersenyzoId);
+            if (!versenyzoLetezik)
+            {
+                return NotFound("A megadott versenyző nem létezik.");
+            }
+
+            var versenyLetezik = await _context.Versenyeks.AnyAsync(v => v.VersenyId == dto.VersenyId);
+            if (!versenyLetezik)
+            {
+                return NotFound("A megadott verseny nem létezik.");
+            }
+
+            var letezik = await _context.Versenyindulas.AnyAsync(v =>
+                v.VersenyzoId == dto.VersenyzoId &&
+                v.VersenyId == dto.VersenyId &&
+                v.Tav == dto.Tav);
+
+            if (letezik)
+            {
+                return Conflict("A versenyző már jelentkezett erre a versenyre ezen a távon.");
+            }
+
+            var jelentkezes = new Versenyindulas
+            {
+                VersenyId = dto.VersenyId,
+                VersenyzoId = dto.VersenyzoId,
+                Tav = dto.Tav,
+                Rajtszam = null,
+                Verseny = null,
+                Versenyzo = null,
+                Indulas = null,
+                Erkezes = null
+            };
+
+            _context.Versenyindulas.Add(jelentkezes);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetVersenyindulas), new { versenyzoId = jelentkezes.VersenyzoId }, jelentkezes);
+        }
+
+
+
         // POST: api/Versenyindulas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -84,8 +134,6 @@ namespace RunBase_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            // A navigációs property-k nullázása, hogy ne okozzanak hibát
             versenyindulas.Verseny = null;
             versenyindulas.Versenyzo = null;
 
@@ -131,5 +179,13 @@ namespace RunBase_API.Controllers
         {
             return _context.Versenyindulas.Any(e => e.VersenyzoId == id);
         }
+
+        public class JelentkezesDto
+        {
+            public int VersenyId { get; set; }
+            public int VersenyzoId { get; set; }
+            public int Tav { get; set; }
+        }
+
     }
 }
