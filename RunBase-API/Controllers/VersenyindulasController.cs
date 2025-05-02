@@ -82,6 +82,8 @@ namespace RunBase_API.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var rajtszamGenerator = new RajtszamGenerator(_context);
+            int ujRajtszam = await rajtszamGenerator.KovetkezoRajtszamAsync(dto.VersenyId, dto.Tav);
 
             var versenyzoLetezik = await _context.Versenyzos.AnyAsync(v => v.VersenyzoId == dto.VersenyzoId);
             if (!versenyzoLetezik)
@@ -110,7 +112,7 @@ namespace RunBase_API.Controllers
                 VersenyId = dto.VersenyId,
                 VersenyzoId = dto.VersenyzoId,
                 Tav = dto.Tav,
-                Rajtszam = null,
+                Rajtszam = ujRajtszam,
                 Verseny = null,
                 Versenyzo = null,
                 Indulas = null,
