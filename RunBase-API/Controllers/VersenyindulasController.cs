@@ -82,19 +82,22 @@ namespace RunBase_API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var rajtszamGenerator = new RajtszamGenerator(_context);
-            int ujRajtszam = await rajtszamGenerator.KovetkezoRajtszamAsync(dto.VersenyId, dto.Tav);
+
+            var verseny = await _context.Versenyeks.FindAsync(dto.VersenyId);
+            if (verseny == null)
+            {
+                return NotFound("A megadott verseny nem létezik.");
+            }
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            if (verseny.Datum < today)
+            {
+                return BadRequest("A verseny már lezajlott, nem lehet rá jelentkezni.");
+            }
 
             var versenyzoLetezik = await _context.Versenyzos.AnyAsync(v => v.VersenyzoId == dto.VersenyzoId);
             if (!versenyzoLetezik)
             {
                 return NotFound("A megadott versenyző nem létezik.");
-            }
-
-            var versenyLetezik = await _context.Versenyeks.AnyAsync(v => v.VersenyId == dto.VersenyId);
-            if (!versenyLetezik)
-            {
-                return NotFound("A megadott verseny nem létezik.");
             }
 
             var letezik = await _context.Versenyindulas.AnyAsync(v =>
@@ -106,6 +109,9 @@ namespace RunBase_API.Controllers
             {
                 return Conflict("A versenyző már jelentkezett erre a versenyre ezen a távon.");
             }
+
+            var rajtszamGenerator = new RajtszamGenerator(_context);
+            int ujRajtszam = await rajtszamGenerator.KovetkezoRajtszamAsync(dto.VersenyId, dto.Tav);
 
             var jelentkezes = new Versenyindulas
             {
@@ -124,6 +130,7 @@ namespace RunBase_API.Controllers
 
             return CreatedAtAction(nameof(GetVersenyindulas), new { versenyzoId = jelentkezes.VersenyzoId }, jelentkezes);
         }
+
 
 
 
