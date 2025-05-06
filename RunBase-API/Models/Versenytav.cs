@@ -10,5 +10,6 @@ public partial class Versenytav
 
     public int VersenyId { get; set; }
 
-    public virtual Versenyek Verseny { get; set; } = null!;
-}
+    public virtual Versenyek? Verseny { get; set; }
+ 
+    }

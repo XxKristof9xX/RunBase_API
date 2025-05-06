@@ -69,14 +69,12 @@ public class ApiKeyMiddleware
 
         var userRole = apiKeyData.role;
 
-        // Adminnak teljes hozzáférés
         if (userRole == "admin")
         {
             await _next(context);
             return;
         }
 
-        // Csak competitor, organizer vagy admin jelentkezhet versenyre
         if (context.Request.Path.StartsWithSegments("/api/versenyindulas/jelentkezes") &&
             context.Request.Method == "POST")
         {
@@ -88,7 +86,6 @@ public class ApiKeyMiddleware
             }
         }
 
-        // Felhasználói szintű korlátozások (user vagy competitor)
         if (userRole == "user" || userRole == "competitor")
         {
             if (
@@ -105,7 +102,6 @@ public class ApiKeyMiddleware
         }
 
 
-        // Organizer nem módosíthat felhasználót
         if (userRole == "organizer" &&
             context.Request.Path.StartsWithSegments("/api/felhasznalok") &&
             context.Request.Method != "GET")
