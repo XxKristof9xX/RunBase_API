@@ -1,11 +1,14 @@
 ﻿using Runbase_API.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace RunBase_API.Models;
 
 public partial class Versenyek
 {
+    [Key]
     public int VersenyId { get; set; }
 
     public string Nev { get; set; } = null!;

@@ -62,7 +62,7 @@ namespace RunBase_API.Controllers
             };
         }
 
-        // POST: api/Versenyek - Új verseny létrehozása képpel
+        // POST: api/Versenyek
         [HttpPost]
         public async Task<ActionResult<Versenyek>> PostVersenyek([FromForm] VersenyCreateDto model)
         {

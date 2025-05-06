@@ -92,8 +92,8 @@ public partial class RunBaseDbContext : DbContext
             entity.ToTable("versenyek", "runbase");
 
             entity.Property(e => e.VersenyId)
-                .ValueGeneratedNever()
-                .HasColumnName("versenyID");
+                .HasColumnName("versenyID")
+                .ValueGeneratedOnAdd();
 
             entity.Property(e => e.Datum).HasColumnName("datum");
 
