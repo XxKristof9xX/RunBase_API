@@ -140,6 +140,7 @@ namespace RunBase_API.Controllers
             _context.Versenyindulas.RemoveRange(indulok);
 
             _context.Versenyeks.Remove(versenyek);
+
             await _context.SaveChangesAsync();
 
             return NoContent();

@@ -37,6 +37,21 @@ namespace RunBase_API.Controllers
                 .ToListAsync();
         }
 
+        // GET: api/Versenytav/5/10
+        [HttpGet("{versenyId}/{tav}")]
+        public async Task<ActionResult<Versenytav>> GetVersenytav(int versenyId, int tav)
+        {
+            var versenytav = await _context.Versenytavs
+                .FirstOrDefaultAsync(vt => vt.VersenyId == versenyId && vt.Tav == tav);
+
+            if (versenytav == null)
+            {
+                return NotFound();
+            }
+
+            return versenytav;
+        }
+
         // PUT: api/Versenytav/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -55,7 +70,7 @@ namespace RunBase_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!VersenytavExists(id))
+                if (!VersenytavExists(id, versenytav.Tav))
                 {
                     return NotFound();
                 }
@@ -80,7 +95,7 @@ namespace RunBase_API.Controllers
             }
             catch (DbUpdateException)
             {
-                if (VersenytavExists(versenytav.Tav))
+                if (VersenytavExists(versenytav.VersenyId, versenytav.Tav))
                 {
                     return Conflict();
                 }
@@ -90,7 +105,7 @@ namespace RunBase_API.Controllers
                 }
             }
 
-            return CreatedAtAction("GetVersenytav", new { id = versenytav.Tav }, versenytav);
+            return CreatedAtAction(nameof(GetVersenytav),new { versenyId = versenytav.VersenyId, tav = versenytav.Tav }, versenytav);
         }
 
         // DELETE: api/versenytav/5/10 (versenyId: 5, tav: 10)
@@ -111,9 +126,9 @@ namespace RunBase_API.Controllers
 
 
 
-        private bool VersenytavExists(int id)
+        private bool VersenytavExists(int versenyId, int tav)
         {
-            return _context.Versenytavs.Any(e => e.Tav == id);
+            return _context.Versenytavs.Any(e => e.VersenyId == versenyId && e.Tav == tav);
         }
     }
 }
