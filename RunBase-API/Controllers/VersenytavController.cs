@@ -29,17 +29,12 @@ namespace RunBase_API.Controllers
         }
 
         // GET: api/Versenytav/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Versenytav>> GetVersenytav(int id)
+        [HttpGet("{versenyId}")]
+        public async Task<ActionResult<IEnumerable<Versenytav>>> GetVersenytavok(int versenyId)
         {
-            var versenytav = await _context.Versenytavs.FindAsync(id);
-
-            if (versenytav == null)
-            {
-                return NotFound();
-            }
-
-            return versenytav;
+            return await _context.Versenytavs
+                .Where(vt => vt.VersenyId == versenyId)
+                .ToListAsync();
         }
 
         // PUT: api/Versenytav/5

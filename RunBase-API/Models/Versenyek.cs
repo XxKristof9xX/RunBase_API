@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace RunBase_API.Models;
 
@@ -23,7 +24,8 @@ public partial class Versenyek
 
     public byte[]? Kep { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<Versenyindulas> Versenyindulas { get; set; } = new List<Versenyindulas>();
-
+    [JsonIgnore]
     public virtual ICollection<Versenytav> Versenytavs { get; set; } = new List<Versenytav>();
 }
