@@ -93,11 +93,11 @@ namespace RunBase_API.Controllers
             return CreatedAtAction("GetVersenytav", new { id = versenytav.Tav }, versenytav);
         }
 
-        // DELETE: api/versenytav/5/10 (versenyId: 5, tavId: 10)
-        [HttpDelete("{versenyId}/{tavId}")]
-        public async Task<IActionResult> DeleteVersenytav(int versenyId, int tavId)
+        // DELETE: api/versenytav/5/10 (versenyId: 5, tav: 10)
+        [HttpDelete("{versenyId}/{tav}")]
+        public async Task<IActionResult> DeleteVersenytav(int versenyId, int tav)
         {
-            var versenytav = await _context.Versenytavs.FindAsync(versenyId, tavId);
+            var versenytav = await _context.Versenytavs.FindAsync(versenyId, tav);
             if (versenytav == null)
             {
                 return NotFound();
