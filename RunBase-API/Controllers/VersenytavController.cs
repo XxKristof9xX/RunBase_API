@@ -93,11 +93,11 @@ namespace RunBase_API.Controllers
             return CreatedAtAction("GetVersenytav", new { id = versenytav.Tav }, versenytav);
         }
 
-        // DELETE: api/Versenytav/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVersenytav(int id)
+        // DELETE: api/versenytav/5/10 (versenyId: 5, tavId: 10)
+        [HttpDelete("{versenyId}/{tavId}")]
+        public async Task<IActionResult> DeleteVersenytav(int versenyId, int tavId)
         {
-            var versenytav = await _context.Versenytavs.FindAsync(id);
+            var versenytav = await _context.Versenytavs.FindAsync(versenyId, tavId);
             if (versenytav == null)
             {
                 return NotFound();
@@ -108,6 +108,7 @@ namespace RunBase_API.Controllers
 
             return NoContent();
         }
+
 
         private bool VersenytavExists(int id)
         {
