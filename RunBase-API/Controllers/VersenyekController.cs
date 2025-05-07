@@ -134,6 +134,11 @@ namespace RunBase_API.Controllers
                 return NotFound();
             }
 
+            var tavok = _context.Versenytavs.Where(v => v.VersenyId == id);
+            _context.Versenytavs.RemoveRange(tavok);
+            var indulok = _context.Versenyindulas.Where(v => v.VersenyId == id);
+            _context.Versenyindulas.RemoveRange(indulok);
+
             _context.Versenyeks.Remove(versenyek);
             await _context.SaveChangesAsync();
 
