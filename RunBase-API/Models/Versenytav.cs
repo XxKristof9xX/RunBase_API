@@ -11,7 +11,6 @@ public partial class Versenytav
 
     public int VersenyId { get; set; }
     [JsonIgnore]
-
     public virtual Versenyek? Verseny { get; set; }
  
     }

@@ -97,7 +97,7 @@ namespace RunBase_API.Controllers
         [HttpDelete("{versenyId}/{tav}")]
         public async Task<IActionResult> DeleteVersenytav(int versenyId, int tav)
         {
-            var versenytav = await _context.Versenytavs.FindAsync(versenyId, tav);
+            var versenytav = await _context.Versenytavs.FindAsync(new object[] { tav, versenyId });
             if (versenytav == null)
             {
                 return NotFound();
@@ -108,6 +108,7 @@ namespace RunBase_API.Controllers
 
             return NoContent();
         }
+
 
 
         private bool VersenytavExists(int id)
