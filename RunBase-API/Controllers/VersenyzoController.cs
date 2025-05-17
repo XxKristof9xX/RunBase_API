@@ -164,12 +164,16 @@ namespace RunBase_API.Controllers
             {
                 return NotFound();
             }
-
+            var versenyinulasok = _context.Versenyindulas
+                .Where(vi => vi.VersenyzoId == id);
+            _context.Versenyindulas.RemoveRange(versenyinulasok);
             _context.Versenyzos.Remove(versenyzo);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
 
         private bool VersenyzoExists(int id)
         {
