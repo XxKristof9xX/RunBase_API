@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Humanizer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RunBase_API.Models;
@@ -72,8 +73,70 @@ namespace RunBase_API.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok();
         }
+
+        [HttpPut("indulas")]
+        public async Task<IActionResult> RögzítIndulás([FromBody] Versenyindulas payload)
+        {
+            var versenyindulas = await _context.Versenyindulas
+                .FirstOrDefaultAsync(v => v.VersenyzoId == payload.VersenyzoId
+                                       && v.VersenyId == payload.VersenyId
+                                       && v.Tav == payload.Tav);
+
+            if (versenyindulas == null)
+            {
+                return NotFound();
+            }
+
+            versenyindulas.Indulas = payload.Indulas;
+            versenyindulas.Erkezes = null;
+            versenyindulas.Rajtszam = payload.Rajtszam;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "Adatbázis hiba indulás mentésekor.");
+            }
+
+            return Ok();
+        }
+
+        [HttpPut("erkezes")]
+        public async Task<IActionResult> RögzítÉrkezes([FromBody] Versenyindulas payload)
+        {
+            var versenyindulas = await _context.Versenyindulas
+                .FirstOrDefaultAsync(v => v.VersenyzoId == payload.VersenyzoId
+                                       && v.VersenyId == payload.VersenyId
+                                       && v.Tav == payload.Tav);
+
+            if (versenyindulas == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrEmpty(versenyindulas.Indulas))
+            {
+                return BadRequest("Az indulást rögzíteni kell érkezés előtt.");
+            }
+
+            versenyindulas.Erkezes = payload.Erkezes;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "Adatbázis hiba érkezés mentésekor.");
+            }
+
+            return Ok();
+        }
+
 
         [HttpPost("jelentkezes")]
         public async Task<ActionResult<Versenyindulas>> Jelentkezes([FromBody] JelentkezesDto dto)
