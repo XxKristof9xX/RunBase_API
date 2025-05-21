@@ -18,6 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Delete old artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '3 days' # vagy pl. '1 day', ahogy szeretnéd
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
